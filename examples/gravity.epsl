@@ -1,0 +1,53 @@
+balls := [];
+ball_rad := 13;
+
+init_window(800, 600, "Hate2D");
+clear_background(DARK_GRAY);
+
+while !window_should_close() {
+	begin_drawing();
+	clear_background(DARK_GRAY);
+	dt := get_frame_time();
+	mx := get_mouse_x();
+	my := get_mouse_y();
+	G := 20.0;
+	
+	if is_mouse_button_pressed(0) {
+		append(balls, {
+			"pos": {"x": float(mx), "y": float(my)},
+			"vel": {"x": float(0),  "y": float(0) },
+		});
+	}
+
+	for iter := 0; iter < 3; iter+=1 {
+		for i := 0; i < len(balls); i+=1 {
+			for j := i + 1; j < len(balls); j+=1 {
+				dx := balls[i]["pos"]["x"] - balls[j]["pos"]["x"];
+				dy := balls[i]["pos"]["y"] - balls[j]["pos"]["y"];
+				D := sqrt(dx * dx + dy * dy);
+
+				balls[i]["vel"]["x"] -= G * dx / (D * D) * dt;
+				balls[i]["vel"]["y"] -= G * dy / (D * D) * dt;
+				balls[j]["vel"]["x"] += G * dx / (D * D) * dt;
+				balls[j]["vel"]["y"] += G * dy / (D * D) * dt;
+			}	
+		}
+
+		for ball in balls {
+			ball["pos"]["x"] += ball["vel"]["x"] * dt;
+			ball["pos"]["y"] += ball["vel"]["y"] * dt;
+		}
+	}
+
+	for ball in balls {
+		draw_rect(
+			int(ball["pos"]["x"] - ball_rad / 2),
+			int(ball["pos"]["y"] - ball_rad / 2),
+			ball_rad, ball_rad,
+			RED);
+	}
+
+	end_drawing();
+}
+
+close_window();
