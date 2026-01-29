@@ -111,7 +111,27 @@ EpslVal EDrawRectangle(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 	return EPSL_VNONE;
 
 error:
-	epsl_throw_error(ctx, cloc, "(int, int, string) expected");
+	epsl_throw_error(ctx, cloc, "(int, int, int, int, color) expected");
+	return EPSL_VNONE;
+}
+
+EpslVal EDrawEllipse(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
+	if (args.count != 5)                      goto error;
+	if (args.items[0].kind != EPSL_VAL_INT)   goto error;
+	if (args.items[1].kind != EPSL_VAL_INT)   goto error;
+	if (args.items[2].kind != EPSL_VAL_FLOAT) goto error;
+	if (args.items[3].kind != EPSL_VAL_FLOAT) goto error;
+	if (args.items[4].kind != EPSL_VAL_INT)   goto error;
+
+	DrawEllipse(args.items[0].as.vint,
+			args.items[1].as.vint,
+			args.items[2].as.vfloat,
+			args.items[3].as.vfloat,
+			GetColor(args.items[4].as.vint));
+	return EPSL_VNONE;
+
+error:
+	epsl_throw_error(ctx, cloc, "(int, int, float, float, color) expected");
 	return EPSL_VNONE;
 }
 
@@ -128,16 +148,39 @@ EpslVal EGetMouseX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) goto error;
+	if (args.count != 0) {
+		epsl_throw_error(ctx, cloc, "() expected");
+		return EPSL_VNONE;
+	}
 
 	return (EpslVal){
 		.kind = EPSL_VAL_INT,
 		.as.vint = GetMouseY(),
 	};
+}
 
-error:
-	epsl_throw_error(ctx, cloc, "() expected");
-	return EPSL_VNONE;
+EpslVal EGetMouseDX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
+	if (args.count != 0) {
+		epsl_throw_error(ctx, cloc, "() expected");
+		return EPSL_VNONE;
+	}
+
+	return (EpslVal){
+		.kind = EPSL_VAL_FLOAT,
+		.as.vfloat = GetMouseDelta().x,
+	};
+}
+
+EpslVal EGetMouseDY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
+	if (args.count != 0) {
+		epsl_throw_error(ctx, cloc, "() expected");
+		return EPSL_VNONE;
+	}
+
+	return (EpslVal){
+		.kind = EPSL_VAL_FLOAT,
+		.as.vfloat = GetMouseDelta().y,
+	};
 }
 
 EpslVal EGetFrameTime(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
@@ -160,6 +203,34 @@ EpslVal EIsMouseButtonPressed(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
 		.as.vbool = IsMouseButtonPressed(args.items[0].as.vint),
+	};
+
+error:
+	epsl_throw_error(ctx, cloc, "(int) expected");
+	return EPSL_VNONE;
+}
+
+EpslVal EIsMouseButtonDown(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
+	if (args.count != 1) goto error;
+	if (args.items[0].kind != EPSL_VAL_INT) goto error;
+
+	return (EpslVal){
+		.kind = EPSL_VAL_BOOL,
+		.as.vbool = IsMouseButtonDown(args.items[0].as.vint),
+	};
+
+error:
+	epsl_throw_error(ctx, cloc, "(int) expected");
+	return EPSL_VNONE;
+}
+
+EpslVal EIsMouseButtonReleased(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
+	if (args.count != 1) goto error;
+	if (args.items[0].kind != EPSL_VAL_INT) goto error;
+
+	return (EpslVal){
+		.kind = EPSL_VAL_BOOL,
+		.as.vbool = IsMouseButtonReleased(args.items[0].as.vint),
 	};
 
 error:
@@ -217,18 +288,33 @@ int main(int argc, char *argv[]) {
 		.as.vint = 0xFF0000FF,
 	});
 
-	epsl_reg_func(ctx, "sqrt",                    ESqrt);
-	epsl_reg_func(ctx, "init_window",             EInitWindow);
-	epsl_reg_func(ctx, "close_window",            ECloseWindow);
-	epsl_reg_func(ctx, "window_should_close",     EWindowShouldClose);
-	epsl_reg_func(ctx, "begin_drawing",           EBeginDrawing);
-	epsl_reg_func(ctx, "end_drawing",             EEndDrawing);
-	epsl_reg_func(ctx, "clear_background",        EClearBackground);
-	epsl_reg_func(ctx, "draw_rect",               EDrawRectangle);
-	epsl_reg_func(ctx, "get_mouse_x",             EGetMouseX);
-	epsl_reg_func(ctx, "get_mouse_y",             EGetMouseY);
-	epsl_reg_func(ctx, "get_frame_time",          EGetFrameTime);
-	epsl_reg_func(ctx, "is_mouse_button_pressed", EIsMouseButtonPressed);
+	epsl_reg_var(ctx, "MOUSE_RIGHT", (EpslVal){
+		.kind = EPSL_VAL_INT,
+		.as.vint = MOUSE_BUTTON_RIGHT,
+	});
+
+	epsl_reg_var(ctx, "MOUSE_LEFT", (EpslVal){
+		.kind = EPSL_VAL_INT,
+		.as.vint = MOUSE_BUTTON_LEFT,
+	});
+
+	epsl_reg_func(ctx, "sqrt",                     ESqrt);
+	epsl_reg_func(ctx, "init_window",              EInitWindow);
+	epsl_reg_func(ctx, "close_window",             ECloseWindow);
+	epsl_reg_func(ctx, "window_should_close",      EWindowShouldClose);
+	epsl_reg_func(ctx, "begin_drawing",            EBeginDrawing);
+	epsl_reg_func(ctx, "end_drawing",              EEndDrawing);
+	epsl_reg_func(ctx, "clear_background",         EClearBackground);
+	epsl_reg_func(ctx, "draw_rect",                EDrawRectangle);
+	epsl_reg_func(ctx, "draw_ellipse",             EDrawEllipse);
+	epsl_reg_func(ctx, "get_mouse_x",              EGetMouseX);
+	epsl_reg_func(ctx, "get_mouse_y",              EGetMouseY);
+	epsl_reg_func(ctx, "get_mouse_dx",             EGetMouseDX);
+	epsl_reg_func(ctx, "get_mouse_dy",             EGetMouseDY);
+	epsl_reg_func(ctx, "get_frame_time",           EGetFrameTime);
+	epsl_reg_func(ctx, "is_mouse_button_pressed",  EIsMouseButtonPressed);
+	epsl_reg_func(ctx, "is_mouse_button_released", EIsMouseButtonReleased);
+	epsl_reg_func(ctx, "is_mouse_button_down",     EIsMouseButtonDown);
 	epsl_eval(ctx);
 	return 0;
 }
