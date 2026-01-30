@@ -10,7 +10,6 @@ mpos := {
 };
 
 init_window(800, 600, "Gravisim");
-clear_background(DARK_GRAY);
 
 while !window_should_close() {
 	begin_drawing();

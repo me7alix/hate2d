@@ -8,7 +8,6 @@ Hate2D is a simple framework for creating 2D games which is based on Raylib and 
 ## Hello, World!
 ```c
 init_window(800, 600, "Hello, World!");
-clear_background(DARK_GRAY);
 
 while !window_should_close() {
 	begin_drawing();
