@@ -30,8 +30,8 @@ while !window_should_close() {
 	} else if is_mouse_button_released(MOUSE_RIGHT) {
 		append(balls, {
 			.pos: {
-				.x: float(mx) - mpos.x,
-				.y: float(my) - mpos.y,
+				.x: float(last_mx) - mpos.x,
+				.y: float(last_my) - mpos.y,
 			},
 			.vel: {
 				.x: (mx - last_mx) * sl_force,

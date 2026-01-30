@@ -3,37 +3,40 @@
 #include <epsl_api.h>
 #include <math.h>
 
+#define check_signature(ctx, cloc, msg, args, ...) \
+	do { \
+		int sig[] = {__VA_ARGS__}; \
+		if (sizeof(sig)/sizeof(*sig) != (args)->count) { \
+			epsl_throw_error(ctx, cloc, msg); \
+			return EPSL_VNONE; \
+		} \
+		for (size_t i = 0; i < (args)->count; i++) { \
+			if ((args)->items[i].kind != sig[i]) { \
+				epsl_throw_error(ctx, cloc, msg); \
+				return EPSL_VNONE; \
+			} \
+		} \
+	} while (0)
+
 EpslVal EInitWindow(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 3)                    goto error;
-	if (args.items[0].kind != EPSL_VAL_INT) goto error;
-	if (args.items[1].kind != EPSL_VAL_INT) goto error;
-	if (args.items[2].kind != EPSL_VAL_STR) goto error;
+	check_signature(ctx, cloc, "(width: int, height: int, title: string) expected",
+			&args, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_STR);
 
 	InitWindow(args.items[0].as.vint,
 			args.items[1].as.vint,
 			epsl_val_get_str(args.items[2])->items);
-	return EPSL_VNONE;
 
-error:
-	epsl_throw_error(ctx, cloc, "(int, int, string) expected");
 	return EPSL_VNONE;
 }
 
 EpslVal ECloseWindow(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "(int, int, string) expected");
-		return EPSL_VNONE;
-	}
-
+	check_signature(ctx, cloc, "() expected", &args);
 	CloseWindow();
 	return EPSL_VNONE;
 }
 
 EpslVal EWindowShouldClose(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
+	check_signature(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
@@ -42,34 +45,20 @@ EpslVal EWindowShouldClose(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EBeginDrawing(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
-
+	check_signature(ctx, cloc, "() expected", &args);
 	BeginDrawing();
 	return EPSL_VNONE;
 }
 
 EpslVal EEndDrawing(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
-
+	check_signature(ctx, cloc, "() expected", &args);
 	EndDrawing();
 	return EPSL_VNONE;
 }
 
 EpslVal EClearBackground(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 1) goto error;
-	if (args.items[0].kind != EPSL_VAL_INT) goto error;
-
+	check_signature(ctx, cloc, "(color: int) expected", &args, EPSL_VAL_INT);
 	ClearBackground(GetColor(args.items[0].as.vint));
-	return EPSL_VNONE;
-
-error:
-	epsl_throw_error(ctx, cloc, "(int) expected");
 	return EPSL_VNONE;
 }
 
@@ -96,50 +85,33 @@ error:
 }
 
 EpslVal EDrawRectangle(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 5)                    goto error;
-	if (args.items[0].kind != EPSL_VAL_INT) goto error;
-	if (args.items[1].kind != EPSL_VAL_INT) goto error;
-	if (args.items[2].kind != EPSL_VAL_INT) goto error;
-	if (args.items[3].kind != EPSL_VAL_INT) goto error;
-	if (args.items[4].kind != EPSL_VAL_INT) goto error;
+	check_signature(ctx, cloc, "(x: int, y: int, w: int, h: int, color: int) expected",
+			&args, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_INT);
 
 	DrawRectangle(args.items[0].as.vint,
 			args.items[1].as.vint,
 			args.items[2].as.vint,
 			args.items[3].as.vint,
 			GetColor(args.items[4].as.vint));
-	return EPSL_VNONE;
 
-error:
-	epsl_throw_error(ctx, cloc, "(int, int, int, int, color) expected");
 	return EPSL_VNONE;
 }
 
 EpslVal EDrawEllipse(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 5)                      goto error;
-	if (args.items[0].kind != EPSL_VAL_INT)   goto error;
-	if (args.items[1].kind != EPSL_VAL_INT)   goto error;
-	if (args.items[2].kind != EPSL_VAL_FLOAT) goto error;
-	if (args.items[3].kind != EPSL_VAL_FLOAT) goto error;
-	if (args.items[4].kind != EPSL_VAL_INT)   goto error;
+	check_signature(ctx, cloc, "(x: int, y: int, r1: float, r2: float, color: int) expected",
+			&args, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_FLOAT, EPSL_VAL_FLOAT, EPSL_VAL_INT);
 
 	DrawEllipse(args.items[0].as.vint,
 			args.items[1].as.vint,
 			args.items[2].as.vfloat,
 			args.items[3].as.vfloat,
 			GetColor(args.items[4].as.vint));
-	return EPSL_VNONE;
 
-error:
-	epsl_throw_error(ctx, cloc, "(int, int, float, float, color) expected");
 	return EPSL_VNONE;
 }
 
 EpslVal EGetMouseX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
+	check_signature(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_INT,
@@ -148,10 +120,7 @@ EpslVal EGetMouseX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
+	check_signature(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_INT,
@@ -160,10 +129,7 @@ EpslVal EGetMouseY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseDX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
+	check_signature(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_FLOAT,
@@ -172,10 +138,7 @@ EpslVal EGetMouseDX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseDY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) {
-		epsl_throw_error(ctx, cloc, "() expected");
-		return EPSL_VNONE;
-	}
+	check_signature(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_FLOAT,
@@ -184,58 +147,39 @@ EpslVal EGetMouseDY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetFrameTime(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 0) goto error;
+	check_signature(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_FLOAT,
 		.as.vfloat = GetFrameTime(),
 	};
-
-error:
-	epsl_throw_error(ctx, cloc, "() expected");
-	return EPSL_VNONE;
 }
 
 EpslVal EIsMouseButtonPressed(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 1) goto error;
-	if (args.items[0].kind != EPSL_VAL_INT) goto error;
+	check_signature(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
 		.as.vbool = IsMouseButtonPressed(args.items[0].as.vint),
 	};
-
-error:
-	epsl_throw_error(ctx, cloc, "(int) expected");
-	return EPSL_VNONE;
 }
 
 EpslVal EIsMouseButtonDown(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 1) goto error;
-	if (args.items[0].kind != EPSL_VAL_INT) goto error;
+	check_signature(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
 		.as.vbool = IsMouseButtonDown(args.items[0].as.vint),
 	};
-
-error:
-	epsl_throw_error(ctx, cloc, "(int) expected");
-	return EPSL_VNONE;
 }
 
 EpslVal EIsMouseButtonReleased(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	if (args.count != 1) goto error;
-	if (args.items[0].kind != EPSL_VAL_INT) goto error;
+	check_signature(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
 		.as.vbool = IsMouseButtonReleased(args.items[0].as.vint),
 	};
-
-error:
-	epsl_throw_error(ctx, cloc, "(int) expected");
-	return EPSL_VNONE;
 }
 
 void print_error(EpslLocation loc, EpslErrorKind ek, char *msg) {
