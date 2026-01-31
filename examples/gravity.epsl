@@ -1,9 +1,13 @@
-G := 80.0;
 balls := [];
 ball_rad := 6.0;
+ball_color := RED;
+
+G := 80.0;
+sl_force := 1.0;
+
 last_mx := 0;
 last_my := 0;
-sl_force := 1.0;
+
 mpos := {
 	.x = 0.0,
 	.y = 0.0
@@ -64,8 +68,7 @@ while !window_should_close() {
 		draw_ellipse(
 			int(ball.pos.x + mpos.x),
 			int(ball.pos.y + mpos.y),
-			ball_rad, ball_rad,
-			RED);
+			ball_rad, ball_rad, ball_color);
 	}
 
 	end_drawing();

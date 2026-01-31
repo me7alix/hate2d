@@ -3,15 +3,15 @@
 #include <epsl_api.h>
 #include <math.h>
 
-#define check_signature(ctx, cloc, msg, args, ...) \
+#define check_args(ctx, cloc, msg, args, ...) \
 	do { \
-		int sig[] = {__VA_ARGS__}; \
-		if (sizeof(sig)/sizeof(*sig) != (args)->count) { \
+		int kinds[] = {__VA_ARGS__}; \
+		if (sizeof(kinds)/sizeof(*kinds) != (args)->count) { \
 			epsl_throw_error(ctx, cloc, msg); \
 			return EPSL_VNONE; \
 		} \
 		for (size_t i = 0; i < (args)->count; i++) { \
-			if ((args)->items[i].kind != sig[i]) { \
+			if ((args)->items[i].kind != kinds[i]) { \
 				epsl_throw_error(ctx, cloc, msg); \
 				return EPSL_VNONE; \
 			} \
@@ -19,7 +19,7 @@
 	} while (0)
 
 EpslVal EInitWindow(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(width: int, height: int, title: string) expected",
+	check_args(ctx, cloc, "(width: int, height: int, title: string) expected",
 			&args, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_STR);
 
 	InitWindow(args.items[0].as.vint,
@@ -30,13 +30,13 @@ EpslVal EInitWindow(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal ECloseWindow(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 	CloseWindow();
 	return EPSL_VNONE;
 }
 
 EpslVal EWindowShouldClose(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
@@ -45,19 +45,19 @@ EpslVal EWindowShouldClose(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EBeginDrawing(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 	BeginDrawing();
 	return EPSL_VNONE;
 }
 
 EpslVal EEndDrawing(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 	EndDrawing();
 	return EPSL_VNONE;
 }
 
 EpslVal EClearBackground(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(color: int) expected", &args, EPSL_VAL_INT);
+	check_args(ctx, cloc, "(color: int) expected", &args, EPSL_VAL_INT);
 	ClearBackground(GetColor(args.items[0].as.vint));
 	return EPSL_VNONE;
 }
@@ -85,7 +85,7 @@ error:
 }
 
 EpslVal EDrawRectangle(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(x: int, y: int, w: int, h: int, color: int) expected",
+	check_args(ctx, cloc, "(x: int, y: int, w: int, h: int, color: int) expected",
 			&args, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_INT);
 
 	DrawRectangle(args.items[0].as.vint,
@@ -98,7 +98,7 @@ EpslVal EDrawRectangle(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EDrawEllipse(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(x: int, y: int, r1: float, r2: float, color: int) expected",
+	check_args(ctx, cloc, "(x: int, y: int, r1: float, r2: float, color: int) expected",
 			&args, EPSL_VAL_INT, EPSL_VAL_INT, EPSL_VAL_FLOAT, EPSL_VAL_FLOAT, EPSL_VAL_INT);
 
 	DrawEllipse(args.items[0].as.vint,
@@ -111,7 +111,7 @@ EpslVal EDrawEllipse(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_INT,
@@ -120,7 +120,7 @@ EpslVal EGetMouseX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_INT,
@@ -129,7 +129,7 @@ EpslVal EGetMouseY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseDX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_FLOAT,
@@ -138,7 +138,7 @@ EpslVal EGetMouseDX(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetMouseDY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_FLOAT,
@@ -147,7 +147,7 @@ EpslVal EGetMouseDY(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EGetFrameTime(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "() expected", &args);
+	check_args(ctx, cloc, "() expected", &args);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_FLOAT,
@@ -156,7 +156,7 @@ EpslVal EGetFrameTime(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EIsMouseButtonPressed(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
+	check_args(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
@@ -165,7 +165,7 @@ EpslVal EIsMouseButtonPressed(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args
 }
 
 EpslVal EIsMouseButtonDown(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
+	check_args(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
@@ -174,7 +174,7 @@ EpslVal EIsMouseButtonDown(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
 }
 
 EpslVal EIsMouseButtonReleased(EpslEvalCtx *ctx, EpslLocation cloc, EpslVals args) {
-	check_signature(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
+	check_args(ctx, cloc, "(button: int) expected", &args, EPSL_VAL_INT);
 
 	return (EpslVal){
 		.kind = EPSL_VAL_BOOL,
@@ -214,6 +214,60 @@ void print_error(EpslLocation loc, EpslErrorKind ek, char *msg) {
 	printf("%s\n", err_ptr);
 }
 
+inline void epsl_reg_color(EpslCtx *ctx, char *name, uint32_t rgba) {
+    epsl_reg_var(ctx, name, (EpslVal){
+        .kind = EPSL_VAL_INT,
+        .as.vint = rgba,
+    });
+}
+
+void epsl_reg_colors(EpslCtx *ctx) {
+	epsl_reg_color(ctx, "BLACK",      0x000000FF);
+	epsl_reg_color(ctx, "WHITE",      0xFFFFFFFF);
+
+	epsl_reg_color(ctx, "GRAY",       0x808080FF);
+	epsl_reg_color(ctx, "DARK_GRAY",  0x181818FF);
+	epsl_reg_color(ctx, "LIGHT_GRAY", 0xD3D3D3FF);
+
+	epsl_reg_color(ctx, "RED",        0xFF0000FF);
+	epsl_reg_color(ctx, "GREEN",      0x00FF00FF);
+	epsl_reg_color(ctx, "BLUE",       0x0000FFFF);
+
+	epsl_reg_color(ctx, "YELLOW",     0xFFFF00FF);
+	epsl_reg_color(ctx, "CYAN",       0x00FFFFFF);
+	epsl_reg_color(ctx, "MAGENTA",    0xFF00FFFF);
+
+	epsl_reg_color(ctx, "ORANGE",     0xFFA500FF);
+	epsl_reg_color(ctx, "PURPLE",     0x800080FF);
+	epsl_reg_color(ctx, "BROWN",      0x8B4513FF);
+}
+
+void epsl_reg_funcs(EpslCtx *ctx) {
+	epsl_reg_func(ctx, "sqrt",                     ESqrt);
+
+	epsl_reg_func(ctx, "init_window",              EInitWindow);
+	epsl_reg_func(ctx, "close_window",             ECloseWindow);
+	epsl_reg_func(ctx, "window_should_close",      EWindowShouldClose);
+
+	epsl_reg_func(ctx, "begin_drawing",            EBeginDrawing);
+	epsl_reg_func(ctx, "end_drawing",              EEndDrawing);
+
+	epsl_reg_func(ctx, "clear_background",         EClearBackground);
+	epsl_reg_func(ctx, "draw_rect",                EDrawRectangle);
+	epsl_reg_func(ctx, "draw_ellipse",             EDrawEllipse);
+
+	epsl_reg_func(ctx, "get_mouse_x",              EGetMouseX);
+	epsl_reg_func(ctx, "get_mouse_y",              EGetMouseY);
+	epsl_reg_func(ctx, "get_mouse_dx",             EGetMouseDX);
+	epsl_reg_func(ctx, "get_mouse_dy",             EGetMouseDY);
+
+	epsl_reg_func(ctx, "get_frame_time",           EGetFrameTime);
+
+	epsl_reg_func(ctx, "is_mouse_button_pressed",  EIsMouseButtonPressed);
+	epsl_reg_func(ctx, "is_mouse_button_released", EIsMouseButtonReleased);
+	epsl_reg_func(ctx, "is_mouse_button_down",     EIsMouseButtonDown);
+}
+
 int main(int argc, char *argv[]) {
 	char *input_file = argv[1];
 	EpslCtx *ctx = epsl_from_file(print_error, input_file);
@@ -221,17 +275,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "No such file...\n");
 		return 1;
 	}
-
-	epsl_reg_var(ctx, "DARK_GRAY", (EpslVal){
-		.kind = EPSL_VAL_INT,
-		.as.vint = 0x181818FF,
-	});
-
-	epsl_reg_var(ctx, "RED", (EpslVal){
-		.kind = EPSL_VAL_INT,
-		.as.vint = 0xFF0000FF,
-	});
-
+	
 	epsl_reg_var(ctx, "MOUSE_RIGHT", (EpslVal){
 		.kind = EPSL_VAL_INT,
 		.as.vint = MOUSE_BUTTON_RIGHT,
@@ -242,23 +286,9 @@ int main(int argc, char *argv[]) {
 		.as.vint = MOUSE_BUTTON_LEFT,
 	});
 
-	epsl_reg_func(ctx, "sqrt",                     ESqrt);
-	epsl_reg_func(ctx, "init_window",              EInitWindow);
-	epsl_reg_func(ctx, "close_window",             ECloseWindow);
-	epsl_reg_func(ctx, "window_should_close",      EWindowShouldClose);
-	epsl_reg_func(ctx, "begin_drawing",            EBeginDrawing);
-	epsl_reg_func(ctx, "end_drawing",              EEndDrawing);
-	epsl_reg_func(ctx, "clear_background",         EClearBackground);
-	epsl_reg_func(ctx, "draw_rect",                EDrawRectangle);
-	epsl_reg_func(ctx, "draw_ellipse",             EDrawEllipse);
-	epsl_reg_func(ctx, "get_mouse_x",              EGetMouseX);
-	epsl_reg_func(ctx, "get_mouse_y",              EGetMouseY);
-	epsl_reg_func(ctx, "get_mouse_dx",             EGetMouseDX);
-	epsl_reg_func(ctx, "get_mouse_dy",             EGetMouseDY);
-	epsl_reg_func(ctx, "get_frame_time",           EGetFrameTime);
-	epsl_reg_func(ctx, "is_mouse_button_pressed",  EIsMouseButtonPressed);
-	epsl_reg_func(ctx, "is_mouse_button_released", EIsMouseButtonReleased);
-	epsl_reg_func(ctx, "is_mouse_button_down",     EIsMouseButtonDown);
+	epsl_reg_colors(ctx);
+	epsl_reg_funcs(ctx);
+
 	epsl_eval(ctx);
 	return 0;
 }
